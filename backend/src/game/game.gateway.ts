@@ -1,6 +1,5 @@
 import {
   ConnectedSocket,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
@@ -30,10 +29,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  async handleJoinRoom(
-    @MessageBody() roomId: string,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    await this.gameService.joinRoom(this.server, socket, roomId);
+  async handleJoinRoom(@ConnectedSocket() socket: Socket) {
+    await this.gameService.joinRoom(this.server, socket);
   }
 }

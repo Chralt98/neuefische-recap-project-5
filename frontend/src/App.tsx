@@ -10,10 +10,25 @@ function App() {
 
     socket.emit("joinRoom", SECRET_ROOM_ID);
 
-    const onRoomJoinedResponse = (data: string) => {
-      console.log(`Received response: ${data}`);
+    const onError = (error: string) => {
+      console.error(`Received error: ${error}`);
     };
-    socket.on("roomJoined", onRoomJoinedResponse);
+    socket.on("error", onError);
+
+    const onWaiting = (message: string) => {
+      console.log(`Received waiting message: ${message}`);
+    };
+    socket.on("waiting", onWaiting);
+
+    const onRoleAssigned = (role: string) => {
+      console.log(`Received role assigned: ${role}`);
+    };
+    socket.on("roleAssigned", onRoleAssigned);
+
+    const onGameStarted = (message: string) => {
+      console.log(`Received game started message: ${message}`);
+    };
+    socket.on("gameStarted", onGameStarted);
 
     return () => {
       socket.disconnect();
