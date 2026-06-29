@@ -48,7 +48,6 @@ function App() {
     socket.on("gameStateUpdate", onGameStateUpdate);
 
     const onTimeUpdate = (data: { timeRemaining: number }) => {
-      console.log(`Time remaining: ${data.timeRemaining} seconds`);
       setTimeRemaining(data.timeRemaining);
     };
     socket.on("timeUpdate", onTimeUpdate);
@@ -65,10 +64,10 @@ function App() {
 
   const getCell = (x: number, y: number) => {
     const hider = players.some(
-      (p) => p.role === "hider" && p.position?.x === x && p.position?.y === y
+      (p) => p.role === "hider" && p.position?.x === x && p.position?.y === y,
     );
     const seeker = players.some(
-      (p) => p.role === "seeker" && p.position?.x === x && p.position?.y === y
+      (p) => p.role === "seeker" && p.position?.x === x && p.position?.y === y,
     );
     if (hider && seeker) return "HS";
     if (hider) return "H";
@@ -81,10 +80,14 @@ function App() {
       <h1>Hide and Seek</h1>
       <p>{status}</p>
       {timeRemaining !== null && (
-        <p>Time remaining: <strong>{timeRemaining}s</strong></p>
+        <p>
+          Time remaining: <strong>{timeRemaining}s</strong>
+        </p>
       )}
       {gameState?.winner && (
-        <p>Winner: <strong>{gameState.winner}</strong></p>
+        <p>
+          Winner: <strong>{gameState.winner}</strong>
+        </p>
       )}
       <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
         <tbody>
@@ -98,9 +101,11 @@ function App() {
                     height: 40,
                     border: "1px solid #ccc",
                     textAlign: "center",
-                    background: getCell(x, y).includes("H") ? "#4caf50"
-                      : getCell(x, y).includes("S") ? "#f44336"
-                      : undefined,
+                    background: getCell(x, y).includes("H")
+                      ? "#4caf50"
+                      : getCell(x, y).includes("S")
+                        ? "#f44336"
+                        : undefined,
                   }}
                 >
                   {getCell(x, y)}
