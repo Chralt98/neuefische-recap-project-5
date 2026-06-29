@@ -2,13 +2,11 @@ import { useEffect } from "react";
 import "./App.css";
 import { socket } from "./socket";
 
-const SECRET_ROOM_ID = "super-secret-room-id";
-
 function App() {
   useEffect(() => {
     socket.connect();
 
-    socket.emit("joinRoom", SECRET_ROOM_ID);
+    socket.emit("joinRoom");
 
     const onError = (error: string) => {
       console.error(`Received error: ${error}`);
@@ -19,6 +17,11 @@ function App() {
       console.log(`Received waiting message: ${message}`);
     };
     socket.on("waiting", onWaiting);
+
+    const onRoomJoined = (message: string) => {
+      console.log(`Received room joined message: ${message}`);
+    };
+    socket.on("roomJoined", onRoomJoined);
 
     const onRoleAssigned = (role: string) => {
       console.log(`Received role assigned: ${role}`);

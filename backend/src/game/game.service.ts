@@ -14,6 +14,11 @@ export class GameService {
   private clientInfo: Record<SocketId, ClientInfo> = {};
 
   async joinRoom(server: Server, socket: Socket): Promise<void> {
+    if (this.clientInfo[socket.id]) {
+      socket.emit('error', 'You are already in a room.');
+      return;
+    }
+
     const generateRoomId = () =>
       `room-${Math.random().toString(36).substring(2, 8)}`;
 
@@ -36,6 +41,7 @@ export class GameService {
     }
 
     await socket.join(roomId);
+    socket.emit('roomJoined', `You joined room "${roomId}".`);
 
     if (socketsInRoom.length === 0) {
       this.waitingRoomId = roomId;
