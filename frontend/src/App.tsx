@@ -52,7 +52,19 @@ function App() {
     };
     socket.on("timeUpdate", onTimeUpdate);
 
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
+      ) {
+        console.log(`Key pressed: ${event.key}`);
+        event.preventDefault();
+        socket.emit("move", event.key);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+
     return () => {
+      window.removeEventListener("keydown", onKeyDown);
       socket.off("connect", onConnect);
       socket.disconnect();
     };
