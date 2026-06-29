@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -28,9 +29,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('test')
-  handleTest(@MessageBody() data: string) {
-    console.log(`Received test message: ${data}`);
-    this.server.emit('testResponse', `Server received: ${data}`);
+  @SubscribeMessage('joinRoom')
+  async handleTest(
+    @MessageBody() roomId: string,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    await socket.join(roomId);
+    this.server.emit(
+      'roomJoined',
+      `Client ${socket.id} joined the room "${roomId}"`,
+    );
   }
 }

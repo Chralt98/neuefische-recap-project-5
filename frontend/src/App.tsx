@@ -2,16 +2,18 @@ import { useEffect } from "react";
 import "./App.css";
 import { socket } from "./socket";
 
+const SECRET_ROOM_ID = "super-secret-room-id";
+
 function App() {
   useEffect(() => {
     socket.connect();
 
-    socket.emit("test", "Hello from the client!");
+    socket.emit("joinRoom", SECRET_ROOM_ID);
 
-    const onTestResponse = (data: string) => {
-      console.log(`Received test response: ${data}`);
+    const onRoomJoinedResponse = (data: string) => {
+      console.log(`Received response: ${data}`);
     };
-    socket.on("testResponse", onTestResponse);
+    socket.on("roomJoined", onRoomJoinedResponse);
 
     return () => {
       socket.disconnect();
