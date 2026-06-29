@@ -18,9 +18,10 @@ export class GameService {
   private playerInfo: Record<SocketId, PlayerInfo> = {};
   private status: Record<RoomId, GameStatus> = {};
   private timers: Record<RoomId, ReturnType<typeof setInterval>> = {};
-  /*
-  TODO: Render the grid on the frontend and update it based on the state received from the backend
-  */
+
+  removePlayer(socketId: SocketId): void {
+    delete this.playerInfo[socketId];
+  }
 
   setStartingPosition(socketId: SocketId): void {
     const player = this.playerInfo[socketId];
@@ -77,12 +78,12 @@ export class GameService {
     this.timers[roomId] = setInterval(() => {
       this.timeRemaining[roomId]--;
 
+      server
+        .to(roomId)
+        .emit('timeUpdate', { timeRemaining: this.timeRemaining[roomId] });
+
       if (this.timeRemaining[roomId] <= 0) {
         this.endGame(server, roomId, 'hider');
-      } else {
-        server
-          .to(roomId)
-          .emit('timeUpdate', { timeRemaining: this.timeRemaining[roomId] });
       }
     }, 1000);
   }
