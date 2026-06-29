@@ -2,6 +2,32 @@
 
 ## Recap Project 5 - Hide and Seek
 
+Monorepo: NestJS-Backend & React-Frontend (Vite) with Socket.io minimal setup.
+
+## Dependencies
+
+- This project was created using `bun init` in bun v1.3.14
+- Node (siehe .nvmrc)
+
+## Install
+
+Install from root.
+
+```bash
+bun install
+```
+
+## Run
+
+Run from root. Starts both applications together.
+
+```bash
+bun run dev
+```
+
+- Backend at http://localhost:3000
+- Frontend at http://localhost:5173
+
 In this recap project you will build a hide and seek game for two players. You play on a grid of cells where each player can move cell by cell in real time. If the seeking player manages to move onto the same square where the other player is, they win. If the hiding player manages to evade the other player until the timer runs out, they win.
 
 You will built this project using the following technologies:
