@@ -30,14 +30,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  async handleTest(
+  async handleJoinRoom(
     @MessageBody() roomId: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    await socket.join(roomId);
-    this.server.emit(
-      'roomJoined',
-      `Client ${socket.id} joined the room "${roomId}"`,
-    );
+    await this.gameService.joinRoom(this.server, socket, roomId);
   }
 }
