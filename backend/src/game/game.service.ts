@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import {
   GameStatus,
+  type GameState,
   type PlayerInfo,
   type Position,
   type Role,
@@ -50,6 +51,17 @@ export class GameService {
     return true; // Valid move
   }
 
+  private getGameState(roomId: RoomId): GameState {
+    return {
+      playerInfo: this.playerInfo,
+      status: this.status[roomId],
+    };
+  }
+
+  private emitGameState(server: Server, roomId: RoomId): void {
+    server.to(roomId).emit('gameStateUpdate', this.getGameState(roomId));
+  }
+
   startGame(
     server: Server,
     roomId: RoomId,
@@ -59,19 +71,18 @@ export class GameService {
     this.status[roomId] = GameStatus.RUNNING;
     this.setStartingPosition(hider);
     this.setStartingPosition(seeker);
-    this.timeRemaining[roomId] = 60; // 60 seconds for the game
-    server.to(roomId).emit('gameStarted', {
-      playerInfo: this.playerInfo,
-      status: this.status[roomId],
-      timeRemaining: this.timeRemaining[roomId],
-    });
+    this.timeRemaining[roomId] = 60;
+    this.emitGameState(server, roomId);
 
     this.timers[roomId] = setInterval(() => {
       this.timeRemaining[roomId]--;
-      server.to(roomId).emit('timeUpdate', this.timeRemaining[roomId]);
 
       if (this.timeRemaining[roomId] <= 0) {
         this.endGame(server, roomId, 'hider');
+      } else {
+        server
+          .to(roomId)
+          .emit('timeUpdate', { timeRemaining: this.timeRemaining[roomId] });
       }
     }, 1000);
   }
@@ -80,7 +91,10 @@ export class GameService {
     clearInterval(this.timers[roomId]);
     delete this.timers[roomId];
     this.status[roomId] = GameStatus.FINISHED;
-    server.to(roomId).emit('gameOver', { winner });
+    server.to(roomId).emit('gameStateUpdate', {
+      ...this.getGameState(roomId),
+      winner,
+    });
   }
 
   async joinRoom(server: Server, socket: Socket): Promise<void> {

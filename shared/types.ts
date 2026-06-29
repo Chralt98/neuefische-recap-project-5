@@ -20,3 +20,9 @@ export enum GameStatus {
 }
 
 export type TimeRemaining = number;
+
+export interface GameState {
+  playerInfo: Record<SocketId, PlayerInfo>;
+  status: GameStatus;
+  winner?: Role;
+}

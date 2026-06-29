@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { PlayerInfo, SocketId } from "../../shared/types";
+import type { GameState } from "../../shared/types";
 import "./App.css";
 import { socket } from "./socket";
 
@@ -29,26 +29,15 @@ function App() {
     };
     socket.on("roleAssigned", onRoleAssigned);
 
-    const onGameStarted = (data: {
-      playerInfo: Record<SocketId, PlayerInfo>;
-      status: string;
-      timeRemaining: number;
-    }) => {
-      console.log(`Game started! Player info:`, data.playerInfo);
-      console.log(`Game status: ${data.status}`);
-      console.log(`Time remaining: ${data.timeRemaining} seconds`);
+    const onGameStateUpdate = (data: GameState) => {
+      console.log(`Game state update:`, data);
     };
-    socket.on("gameStarted", onGameStarted);
+    socket.on("gameStateUpdate", onGameStateUpdate);
 
     const onTimeUpdate = (data: { timeRemaining: number }) => {
       console.log(`Time remaining: ${data.timeRemaining} seconds`);
     };
     socket.on("timeUpdate", onTimeUpdate);
-
-    const onGameOver = (data: { winner: string }) => {
-      console.log(`Game over! Winner: ${data.winner}`);
-    };
-    socket.on("gameOver", onGameOver);
 
     return () => {
       socket.disconnect();
