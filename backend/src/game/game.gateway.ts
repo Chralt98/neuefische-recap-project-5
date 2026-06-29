@@ -1,6 +1,8 @@
 import {
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -14,7 +16,7 @@ import { GameService } from './game.service';
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   constructor(private readonly gameService: GameService) {}
 
@@ -24,5 +26,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
+  }
+
+  @SubscribeMessage('test')
+  handleTest(@MessageBody() data: string) {
+    console.log(`Received test message: ${data}`);
+    this.server.emit('testResponse', `Server received: ${data}`);
   }
 }
