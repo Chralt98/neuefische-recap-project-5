@@ -33,12 +33,7 @@ export class GameService {
     }
   }
 
-  validMove(socketId: SocketId, newPosition: Position): boolean {
-    const player = this.playerInfo[socketId];
-    if (!player) {
-      return false; // Player not found
-    }
-
+  validMove(newPosition: Position): boolean {
     // Check if the new position is within the grid boundaries (0-9 for a 10x10 grid)
     if (
       newPosition.x < 0 ||
@@ -148,5 +143,42 @@ export class GameService {
     socket.emit('roleAssigned', 'seeker');
 
     this.startGame(server, roomId, hider.id, socket.id);
+  }
+
+  handleMove(server: Server, socket: Socket, key: string): void {
+    const player = this.playerInfo[socket.id];
+    if (!player) {
+      socket.emit('error', 'You are not in a game.');
+      return;
+    }
+    if (!player.position) {
+      socket.emit('error', 'Player position is not set.');
+      return;
+    }
+    const roomId = player.roomId;
+    const gameStatus = this.status[roomId];
+    if (gameStatus !== GameStatus.RUNNING) {
+      socket.emit('error', 'Game is not running.');
+      return;
+    }
+    if (
+      key !== 'ArrowUp' &&
+      key !== 'ArrowDown' &&
+      key !== 'ArrowLeft' &&
+      key !== 'ArrowRight'
+    ) {
+      socket.emit('error', 'Invalid move key.');
+      return;
+    }
+    const oldPosition = { ...player.position };
+    if (key === 'ArrowUp') player.position.y--;
+    if (key === 'ArrowDown') player.position.y++;
+    if (key === 'ArrowLeft') player.position.x--;
+    if (key === 'ArrowRight') player.position.x++;
+    player.position = this.validMove(player.position)
+      ? player.position
+      : oldPosition;
+    this.playerInfo[socket.id] = player;
+    this.emitGameState(server, roomId);
   }
 }
