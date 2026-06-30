@@ -199,20 +199,19 @@ export class GameService {
     }
   }
 
-  handleDisconnect(server: Server, socket: Socket): void {
+  async handleDisconnect(server: Server, socket: Socket): Promise<void> {
     const player = this.playerInfo[socket.id];
     if (!player) {
+      const roomId = this.waitingRoomId;
+      if (roomId && (await server.in(roomId).fetchSockets()).length === 0) {
+        this.waitingRoomId = null;
+        delete this.status[roomId];
+      }
       return;
     }
-    const roomId = player?.roomId;
+    const roomId = player.roomId;
     server.to(roomId).emit('error', `Player ${socket.id} has left the game.`);
-    if (roomId) {
-      this.endGame(
-        server,
-        roomId,
-        player.role === 'hider' ? 'seeker' : 'hider',
-      );
-    }
+    this.endGame(server, roomId, player.role === 'hider' ? 'seeker' : 'hider');
     this.removePlayer(socket.id);
   }
 }

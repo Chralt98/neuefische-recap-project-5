@@ -25,9 +25,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    this.gameService.handleDisconnect(this.server, client);
+    await this.gameService.handleDisconnect(this.server, client);
   }
 
   @SubscribeMessage('joinRoom')
