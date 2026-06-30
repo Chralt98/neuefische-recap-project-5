@@ -198,4 +198,21 @@ export class GameService {
       this.endGame(server, roomId, 'seeker');
     }
   }
+
+  handleDisconnect(server: Server, socket: Socket): void {
+    const player = this.playerInfo[socket.id];
+    if (!player) {
+      return;
+    }
+    const roomId = player?.roomId;
+    server.to(roomId).emit('error', `Player ${socket.id} has left the game.`);
+    if (roomId) {
+      this.endGame(
+        server,
+        roomId,
+        player.role === 'hider' ? 'seeker' : 'hider',
+      );
+    }
+    this.removePlayer(socket.id);
+  }
 }
