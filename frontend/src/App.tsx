@@ -9,6 +9,7 @@ function App() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [status, setStatus] = useState<string>("Connecting...");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const onConnect = () => {
@@ -20,7 +21,7 @@ function App() {
 
     const onError = (error: string) => {
       console.error(`Received error: ${error}`);
-      setStatus(`Error: ${error}`);
+      setError(error);
     };
     socket.on("error", onError);
 
@@ -95,15 +96,19 @@ function App() {
     <div>
       <h1>Hide and Seek</h1>
       <p>{status}</p>
-      {timeRemaining !== null && (
+      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {timeRemaining !== null && timeRemaining > 0 && (
         <p>
           Time remaining: <strong>{timeRemaining}s</strong>
         </p>
       )}
       {gameState?.winner && (
-        <p>
-          Winner: <strong>{gameState.winner}</strong>
-        </p>
+        <div>
+          <p>Game Over!</p>
+          <p>
+            Winner: <strong>{gameState.winner}</strong>
+          </p>
+        </div>
       )}
       <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
         <tbody>
