@@ -89,6 +89,9 @@ function App() {
     ? Object.values(gameState.playerInfo)
     : [];
 
+  const isWall = (x: number, y: number) =>
+    gameState?.walls?.some((wall) => wall.x === x && wall.y === y) ?? false;
+
   const getCell = (x: number, y: number) => {
     const hider = players.some(
       (p) => p.role === "hider" && p.position?.x === x && p.position?.y === y,
@@ -139,7 +142,9 @@ function App() {
                         ? "#f44336"
                         : getCell(x, y).includes("H")
                           ? "#4caf50"
-                          : undefined,
+                          : isWall(x, y)
+                            ? "#555555"
+                            : undefined,
                   }}
                 >
                   {getCell(x, y)}

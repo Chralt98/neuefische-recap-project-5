@@ -25,4 +25,5 @@ export interface GameState {
   playerInfo: Record<SocketId, PlayerInfo>;
   status: GameStatus;
   winner?: Role;
+  walls: Position[];
 }

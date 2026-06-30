@@ -11,6 +11,23 @@ import {
   type TimeRemaining,
 } from '../../../shared/types.js';
 
+const WALL_LAYOUT: Position[] = [
+  { x: 3, y: 1 },
+  { x: 3, y: 2 },
+  { x: 3, y: 3 },
+  { x: 3, y: 7 },
+  { x: 3, y: 8 },
+  { x: 6, y: 1 },
+  { x: 6, y: 2 },
+  { x: 6, y: 6 },
+  { x: 6, y: 7 },
+  { x: 6, y: 8 },
+  { x: 1, y: 5 },
+  { x: 2, y: 5 },
+  { x: 7, y: 4 },
+  { x: 8, y: 4 },
+];
+
 @Injectable()
 export class GameService {
   private waitingRoomId: RoomId | null = null;
@@ -18,6 +35,7 @@ export class GameService {
   private playerInfo: Record<SocketId, PlayerInfo> = {};
   private status: Record<RoomId, GameStatus> = {};
   private timers: Record<RoomId, ReturnType<typeof setInterval>> = {};
+  private walls: Record<RoomId, Position[]> = {};
 
   removePlayer(socketId: SocketId): void {
     delete this.playerInfo[socketId];
@@ -33,7 +51,7 @@ export class GameService {
     }
   }
 
-  validMove(newPosition: Position): boolean {
+  validMove(roomId: RoomId, newPosition: Position): boolean {
     // Check if the new position is within the grid boundaries (0-9 for a 10x10 grid)
     if (
       newPosition.x < 0 ||
@@ -42,6 +60,14 @@ export class GameService {
       newPosition.y > 9
     ) {
       return false; // Out of bounds
+    }
+
+    if (
+      (this.walls[roomId] ?? []).some((wall) =>
+        this.isCollision(wall, newPosition),
+      )
+    ) {
+      return false; // Blocked by a wall
     }
 
     return true; // Valid move
@@ -57,7 +83,11 @@ export class GameService {
         ([, player]) => player.roomId === roomId,
       ),
     );
-    return { playerInfo, status: this.status[roomId] };
+    return {
+      playerInfo,
+      status: this.status[roomId],
+      walls: this.walls[roomId] ?? [],
+    };
   }
 
   private emitGameState(server: Server, roomId: RoomId): void {
@@ -73,6 +103,7 @@ export class GameService {
     this.status[roomId] = GameStatus.RUNNING;
     this.setStartingPosition(hider);
     this.setStartingPosition(seeker);
+    this.walls[roomId] = [...WALL_LAYOUT];
     this.timeRemaining[roomId] = 60;
     this.emitGameState(server, roomId);
 
@@ -105,6 +136,7 @@ export class GameService {
     server.in(roomId).socketsLeave(roomId);
     delete this.status[roomId];
     delete this.timeRemaining[roomId];
+    delete this.walls[roomId];
   }
 
   async joinRoom(server: Server, socket: Socket): Promise<void> {
@@ -189,7 +221,7 @@ export class GameService {
     if (key === 'ArrowDown') newPosition.y++;
     if (key === 'ArrowLeft') newPosition.x--;
     if (key === 'ArrowRight') newPosition.x++;
-    if (!this.validMove(newPosition)) {
+    if (!this.validMove(roomId, newPosition)) {
       return;
     }
     player.position = newPosition;
