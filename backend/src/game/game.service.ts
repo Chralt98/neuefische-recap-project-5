@@ -174,16 +174,18 @@ export class GameService {
       socket.emit('error', 'Invalid move key.');
       return;
     }
-    const oldPosition = { ...player.position };
-    if (key === 'ArrowUp') player.position.y--;
-    if (key === 'ArrowDown') player.position.y++;
-    if (key === 'ArrowLeft') player.position.x--;
-    if (key === 'ArrowRight') player.position.x++;
-    player.position = this.validMove(player.position)
-      ? player.position
-      : oldPosition;
+    const newPosition = { ...player.position };
+    if (key === 'ArrowUp') newPosition.y--;
+    if (key === 'ArrowDown') newPosition.y++;
+    if (key === 'ArrowLeft') newPosition.x--;
+    if (key === 'ArrowRight') newPosition.x++;
+    if (!this.validMove(newPosition)) {
+      return;
+    }
+    player.position = newPosition;
     this.playerInfo[socket.id] = player;
     this.emitGameState(server, roomId);
+    // Check for collision after the move
     const socketsInRoom = await server.in(roomId).fetchSockets();
     const hider = socketsInRoom[0];
     const seeker = socketsInRoom[1];
