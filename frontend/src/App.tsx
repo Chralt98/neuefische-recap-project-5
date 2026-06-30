@@ -117,11 +117,13 @@ function App() {
                     height: 40,
                     border: "1px solid #ccc",
                     textAlign: "center",
-                    background: getCell(x, y).includes("H")
-                      ? "#4caf50"
-                      : getCell(x, y).includes("S")
+                    background:
+                      getCell(x, y).includes("HS") ||
+                      getCell(x, y).includes("S")
                         ? "#f44336"
-                        : undefined,
+                        : getCell(x, y).includes("H")
+                          ? "#4caf50"
+                          : undefined,
                   }}
                 >
                   {getCell(x, y)}
