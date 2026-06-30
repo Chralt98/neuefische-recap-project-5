@@ -52,10 +52,12 @@ export class GameService {
   }
 
   private getGameState(roomId: RoomId): GameState {
-    return {
-      playerInfo: this.playerInfo,
-      status: this.status[roomId],
-    };
+    const playerInfo = Object.fromEntries(
+      Object.entries(this.playerInfo).filter(
+        ([, player]) => player.roomId === roomId,
+      ),
+    );
+    return { playerInfo, status: this.status[roomId] };
   }
 
   private emitGameState(server: Server, roomId: RoomId): void {
@@ -95,6 +97,14 @@ export class GameService {
       ...this.getGameState(roomId),
       winner,
     });
+    for (const [socketId, player] of Object.entries(this.playerInfo)) {
+      if (player.roomId === roomId) {
+        this.removePlayer(socketId);
+      }
+    }
+    server.in(roomId).socketsLeave(roomId);
+    delete this.status[roomId];
+    delete this.timeRemaining[roomId];
   }
 
   async joinRoom(server: Server, socket: Socket): Promise<void> {

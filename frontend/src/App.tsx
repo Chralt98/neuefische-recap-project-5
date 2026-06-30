@@ -65,6 +65,9 @@ function App() {
         ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
       ) {
         event.preventDefault();
+        if (gameState?.winner) {
+          return; // Ignore moves if the game is over
+        }
         socket.emit("move", event.key);
       }
     };
@@ -73,7 +76,14 @@ function App() {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, []);
+  }, [gameState]);
+
+  const onPlayAgain = () => {
+    socket.emit("joinRoom");
+    setGameState(null);
+    setTimeRemaining(null);
+    setError(null);
+  };
 
   const players = gameState?.playerInfo
     ? Object.values(gameState.playerInfo)
@@ -108,6 +118,7 @@ function App() {
           <p>
             Winner: <strong>{gameState.winner}</strong>
           </p>
+          <button onClick={onPlayAgain}>Play again!</button>
         </div>
       )}
       <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>

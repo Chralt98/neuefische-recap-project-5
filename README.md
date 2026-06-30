@@ -38,8 +38,6 @@ You will built this project using the following technologies:
 
 Good luck!
 
-Translate this file ↗
-
 ## Recap Project 5 - Challenges
 
 This is the recap project for the Real-Time Communication module. You will build a Hide and Seek game from the introduction: two players on a grid, moving cell by cell in real time. The seeker wins by landing on the hider’s cell; the hider wins by staying free until the timer ends.
