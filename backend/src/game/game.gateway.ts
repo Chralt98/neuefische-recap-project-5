@@ -36,7 +36,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('move')
-  handleMove(@ConnectedSocket() socket: Socket, @MessageBody() key: string) {
-    this.gameService.handleMove(this.server, socket, key);
+  async handleMove(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() key: string,
+  ) {
+    await this.gameService.handleMove(this.server, socket, key);
   }
 }

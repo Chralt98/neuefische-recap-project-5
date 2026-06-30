@@ -47,6 +47,10 @@ export class GameService {
     return true; // Valid move
   }
 
+  isCollision(pos1: Position, pos2: Position): boolean {
+    return pos1.x === pos2.x && pos1.y === pos2.y;
+  }
+
   private getGameState(roomId: RoomId): GameState {
     return {
       playerInfo: this.playerInfo,
@@ -145,7 +149,7 @@ export class GameService {
     this.startGame(server, roomId, hider.id, socket.id);
   }
 
-  handleMove(server: Server, socket: Socket, key: string): void {
+  async handleMove(server: Server, socket: Socket, key: string): Promise<void> {
     const player = this.playerInfo[socket.id];
     if (!player) {
       socket.emit('error', 'You are not in a game.');
@@ -180,5 +184,16 @@ export class GameService {
       : oldPosition;
     this.playerInfo[socket.id] = player;
     this.emitGameState(server, roomId);
+    const socketsInRoom = await server.in(roomId).fetchSockets();
+    const hider = socketsInRoom[0];
+    const seeker = socketsInRoom[1];
+    if (
+      this.isCollision(
+        this.playerInfo[hider.id].position!,
+        this.playerInfo[seeker.id].position!,
+      )
+    ) {
+      this.endGame(server, roomId, 'seeker');
+    }
   }
 }
